@@ -1,7 +1,7 @@
 
 const Expuser=require(('../models/user'))
 const bcrypt=require('bcrypt')
-//const jwt=require('jsonwebtoken')
+
 
 exports.newuser=  (req,res,next)=>{
     // const name = req.body.name;
