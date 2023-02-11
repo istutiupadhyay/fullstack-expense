@@ -1,6 +1,7 @@
 
 const Expuser=require(('../models/user'))
 const bcrypt=require('bcrypt')
+const jwt=require('jsonwebtoken');
 
 
 exports.newuser=  (req,res,next)=>{
@@ -32,6 +33,10 @@ bcrypt.hash(password,10,(err,hash)=>{
 })
 }
 
+function generateAccessToken(id,name){
+    return jwt.sign({userId:id},'34hfn5736fnnieowr753845nfr56ygd348kjtfht795478thrfw578whhhr8')
+    }
+
 exports.existinguser=(req,res,next)=>{
         const {email,password}=req.body;
         if(email.length==0 || password.length==0){
@@ -41,7 +46,7 @@ exports.existinguser=(req,res,next)=>{
         .then((user)=>{
             if(user.length>0){
                 if(user[0].password === password){
-                    res.status(200).json({success: true, message:"Successfully logged in"})
+                    res.status(200).json({success: true, message:"Successfully logged in", token:generateAccessToken(User.id)})
                 } else{
                     return res.status(401).json({success: false, message:"Password is incorrect"})
                 }
