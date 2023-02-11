@@ -21,6 +21,9 @@ app.set('views', 'views');
 //app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+Expuser.hasMany(Expense);
+Expense.belongsTo(Expuser);
+
 sequelize
 .sync()
 .then(result=>{
