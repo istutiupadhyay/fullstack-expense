@@ -8,13 +8,13 @@
     <title>Document</title>
 </head>
 <body>
-    <form id="addform" onsubmit="addExpense(event)">
+    <form id="addform">
         <h1>Expence Tracker</h1>
 
-    <label for="expense">Choose expense-amount:</label><br>
-    <input type="number" name="expenseamount"><br>
+    <label for="expence">Choose expense-amount:</label><br>
+    <input type="number" id="expence"><br>
     <label for="description">Choose description:</label><br>
-    <input type="text" name="description"><br>
+    <input type="text" id="description"><br>
     <label for="category">Choose a category:</label><br>
   <select id="category" name="category">
     <option value="rent">rent</option>
@@ -24,57 +24,127 @@
     <option value="ticket">Ticket</option>
   </select><br><br><br>
     <input type="submit" value="Add expences"><br>
+    <ul id="users"></ul><br>
+    <div id='new'></div>
 </form>
 </div>
-<ul id="listOfExpenses"></ul>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.2/axios.min.js" ></script>
 <script>
-  function addExpense(e){
+  var Form=document.getElementById('addform')
+  var expence=document.getElementById('expence');
+  var description=document.getElementById('description');
+  var category=document.getElementById('category');
+  var userList=document.getElementById('users');
+  var doc=document.getElementById('new');
+  let flag=0;
+  let usrid;
+
+
+Form.addEventListener('submit',addUser);
+//document.addEventListener('DOMContentLoaded',reload);
+const token = localStorage.getItem('token');
+function addUser(e)
+{
     e.preventDefault();
+    let Obj={
+            expence:expence.value,
+            description:description.value,
+            category:category.value
+        }
 
-    const obj = {
-      expenseamount: e.target.expenseamount.value,
-      description: e.target.description.value,
-      category: e.target.category.value
-    }
-    console.log(obj);
-    axios.post('http://localhost:4000/add-expense', obj)
-      .then((response) => {
-        showOnScreen(response.data.expense);
-      }) 
-      .catch(err => console.log(err));
-  }
+        if(flag==0){
+          newUser(Obj);
+        }
+}
 
-  window.addEventListener('DOMContentLoaded', ()=> {
-    axios.get('http://localhost:4000/get-expense')
+function reload(e){
+
+e.preventDefault();
+
+}
+window.addEventListener('DOMContentLoaded', ()=> {
+    axios.get('http://localhost:4000/get-expense',{headers:{'Authorization':token}})
     .then(response => {
-      response.data.expence.forEach(expence => {
+      response.data.expense.forEach(expence => {
         showOnScreen(expence);
       })
     })
   })
+
+function showonscreen1(data){
+  var name=data.name;
+  var Data=data.expenes;
+  if(Data.length>0){
+    var newli=document.createElement('li');
+    newli.className='name';
+    newli.appendChild(document.createTextNode(`${name}`));
+    expList.appendChild(newli)
+
+    for(var i=0;i<Data.length;i++){
+      var li=document.createElement('li');
+      li.className='item';
+      li.appendChild(document.createTextNode(`${Data[i].expence}-${Data[i].description}-${Data[i].category}`));
+
+      expList.appendChild(li);
+    }
+}
+}
+
+function showonscreen(data)
+{
+var id=data.id
+ var li=document.createElement('li');
+ li.className='item';
+ li.appendChild(document.createTextNode(`${data.expence}-${data.description}-${data.category}  `));
+
+ var deleteBtn=document.createElement('button');
+ deleteBtn.className='btn';
+ deleteBtn.appendChild(document.createTextNode('delete'));
+ li.appendChild(deleteBtn);
+
+userList.appendChild(li);
+userList.addEventListener('click',deleteuser);
+
+function deleteuser(e)
+{
+    if(e.target==deleteBtn)
+    {
+
+        let li=e.target.parentElement;
+        deletee(li,id);
+        userList.removeChild(li);
+    }
+}
+ }
+
+ async function newUser(Obj)
+     {
+      const token=localStorage.getItem('token')
+       let data=await axios.post("http://localhost:4000/add-expense",Obj,{headers:{'Authorization':token}})
+       showonscreen(Obj);
+     }
+
+async function deletee(li,id){
+  try{
+    console.log(id,'342');
+    const token=localStorage.getItem('token')
+    let response =   await axios.delete(`http://localhost:4000/delete-expense/${id}`,{headers:{'Authorization':token}})
+    console.log(response);
+  }
+  catch{
+    throw new Error(response.data)
+  }
+}
   
-  function showOnScreen(expense){
+  /*function showOnScreen(expense){
     const parentElement = document.getElementById('listOfExpenses');
     const expenseElement = `expense-${expense.id}`;
     parentElement.innerHTML += 
     `<li id = ${expenseElement}>
       ${expense.expenseamount} - ${expense.description} - ${expense.category}
       <button onclick='deleteExpense(event, ${expense.id}'>Delete Expense</button></li> `
-  }
+  }*/
 
-  function deleteExpense(e, expenceid){
-    axios.delete(`http://localhost:4000/delete-expense/${expenceid}`)
-    .then(() => {
-      removeFromScreen(expenceid);
-    })
-    .catch((err) => console.log(err));
-  }
-
-  function removeFromScreen(expenceid){
-    const expenseElement = `expence-${expenceid}`;
-    document.getElementById(expenseElement).remove();
-  }
 </script>
 </body>
 </html>
