@@ -12,7 +12,7 @@ exports.postexpense=(req,res,next)=>{
     .catch(err => { res.status(500).json({success: false, error: err}) });
 }
 
-/*exports.getexpense=(req, res, next)=>{
+exports.getexpense=(req, res, next)=>{
     Expuser.findAll().then(expence =>{
         return res.status(200).json({expence, success: true})
     })
@@ -30,4 +30,4 @@ exports.deleteexpense=(req, res, next)=>{
     .catch(err =>{
         return res.status(500).json({success: true, message: "failed"})
     })
-}*/
+}
