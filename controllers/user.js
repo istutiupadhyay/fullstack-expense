@@ -34,7 +34,7 @@ bcrypt.hash(password,10,(err,hash)=>{
 }
 
 function generateAccessToken(id,name){
-    return jwt.sign({userId:id},'34hfn5736fnnieowr753845nfr56ygd348kjtfht795478thrfw578whhhr8')
+    return jwt.sign({userId:id, name:name},' process.env.SECRET_TOKEN')
     }
 
 exports.existinguser=(req,res,next)=>{
@@ -46,7 +46,7 @@ exports.existinguser=(req,res,next)=>{
         .then((user)=>{
             if(user.length>0){
                 if(user[0].password === password){
-                    res.status(200).json({success: true, message:"Successfully logged in", token:generateAccessToken(User.id)})
+                    res.status(200).json({success: true, message:"Successfully logged in", token:generateAccessToken(User.id, User.name)})
                 } else{
                     return res.status(401).json({success: false, message:"Password is incorrect"})
                 }
