@@ -127,6 +127,29 @@ async function deletee(li,id){
     throw new Error(response.data)
   }
 }
+
+function download(){
+    axios.get('http://localhost:3000/download', { headers: {"Authorization" : token} })
+    .then((response) => {
+      console.log(response.data,'182');
+        if(response.status === 200){
+            //the bcakend is essentially sending a download link
+            //  which if we open in browser, the file would download
+           var a = document.createElement("a");
+            a.href = response.data.fileUrl;
+            a.download = 'myexpense.csv';
+            a.click();
+
+        } else {
+            throw new Error(response.data.message)
+        }
+
+    })
+    .catch((err) => {
+        console.log(err)
+    });
+  }
+
     
 document.getElementById('rzp-button1').onclick = async function (e) {
   e.preventDefault();
@@ -176,6 +199,68 @@ document.getElementById('rzp-button1').onclick = async function (e) {
       ${expense.expenseamount} - ${expense.description} - ${expense.category}
       <button onclick='deleteExpense(event, ${expense.id}'>Delete Expense</button></li> `
   }*/
+    
+  window.addEventListener('DOMContentLoaded',()=>{
+    const expenseDetails=document.getElementById('expense-details');
+    const token = localStorage.getItem('token');
+    const premiumTag= document.getElementById('premium-tag');
+    const premiumBtn=document.getElementById('rzp-button1');
+    axios.get('http://localhost:3000/premiumusers',{headers:{'Authorization':token}})
+    .then(res=>{
+        if(res.data.ispremiumuser==false){
+            expenseDetails.remove()
+        }
+        if(res.data.ispremiumuser==true){
+            premiumTag.innerHTML=('<h2>Premium User</h2>')
+            premiumBtn.remove()
+            axios.get('http://localhost:3000/getusers').then(res=>{
+                const users=res.data.data;
+                for(var i=0; i<users.length; i++){
+                leaderBoardUsers(users[i])
+            }
+        })
+        }
+
+
+    }).catch(err => {
+        console.log(err)
+    })
+})
+
+//to show users on leaderboard
+function leaderBoardUsers(user){
+    const leaderBoard=document.getElementById('leaderboard');  
+    const data=`<li>${user.name} <button onClick=showDetails(${user.id})>Show Details</button> </li>`
+    leaderBoard.innerHTML+=data;
+}
+
+function showDetails(id){
+    axios.get(`http://localhost:3000/getdetails/${id}`)
+    .then(res=>{
+        console.log(res,'<<<<details')   
+        const datas=res.data.data;
+        if(datas.length==0){
+            showNull()
+        }else{
+            for(var i=0; i<datas.length; i++){
+                showDetailsOnScreen(datas[i])
+            } 
+        }         
+    }).catch(err => console.log(err))
+}
+
+// To show others details (premium feature)
+function showDetailsOnScreen(data){
+    const details=document.getElementById('other-details');
+    const datas=`<li>${data.expence}-----${data.description}-----${data.category} </li>`
+    details.innerHTML +=datas;
+}
+
+
+function showNull(){
+    const details=document.getElementById('other-details');
+    details.innerHTML="No Expense Added";
+}
 
 </script>
 </body>
