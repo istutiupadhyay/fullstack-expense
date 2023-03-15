@@ -15,15 +15,31 @@ const addexpense = (req, res) => {
     })
 }
 
-const getexpenses = (req, res)=> {
+const getExpense=async(req,res,next)=>{
+            const page=+req.query.page || 1;
+            let totalExpenses;
+            const EXPENSE_PER_PAGE=+req.query.rows;
+            // console.log(PER_PAGE,'<<<<<<<<<<<rows')
+            Expense.count({where:{userId:req.user.id}}).then(numExpenses=>{
+                totalExpenses=numExpenses;
+                return Expense.findAll(
+                    {where:{userId:req.user.id},
+                    offset:(page-1)*EXPENSE_PER_PAGE,
+                    limit:EXPENSE_PER_PAGE
+                })
+                .then(expenses=>{
+                    res.json({
+                        data:expenses,
+                        currentPage:page,
+                        hasNextPage:EXPENSE_PER_PAGE * page < totalExpenses,
+                        hasPreviousPage:page>1,
+                        nextPage:page+1,
+                        previousPage:page-1,
+                    })
+                })
+            })
+        }
 
-    Expense.findAll().then(expenses => {
-        return res.status(200).json({expenses, success: true})
-    })
-    .catch(err => {
-        return res.status(402).json({ error: err, success: false})
-    })
-}
 
 const deleteexpense = (req, res) => {
     const expenseid = req.params.expenseid;
