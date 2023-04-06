@@ -1,15 +1,10 @@
 const Sequelize = require('sequelize')
+const dotenv = require('dotenv');
+dotenv.config();
 
-// const pool = mysql.createPool({
-//     host: 'localhost',
-//     user: 'root',
-//     database: 'nodetutorial',
-//     password: 'apple@17'
-// });
-
-const sequelize = new Sequelize('ExpenseTracker', 'root', 'Root@12345',{
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD,{
     dialect: 'mysql',
-    host: 'localhost'
+    host: process.env.DB_HOST
 })
 
 module.exports = sequelize;
